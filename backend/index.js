@@ -44,6 +44,51 @@ app.get("/", (req, res) => {
     console.log("hello world");
 });
 
+// upload new object 
+app.post("/upload", upload.array("newFile", 10), async (req, res) => {
+  const files = req.files;
+  
+  if (!files) {
+    return res.status(400).send("No file received");
+  }
+
+  try {
+    const uploadPromises = files.map(async (file) => {
+      const fileStream = createReadStream(file.path);
+      const params = {
+        Bucket: awsBucketName,
+        Key: replaceSpaces(uuidv4()+"-"+file.originalname), // Using UUID for unique file names
+        Body: fileStream, // using buffer would be quicker but image file isnt displayed correctly to client
+          ContentType: file.mimetype,
+          ContentDisposition: 'inline',
+      };
+
+      try {
+        const uploadData = await s3.send(new PutObjectCommand(params));
+        fs.unlink(file.path);
+        return uploadData;
+      } catch (error) {
+        console.error({ message: "Error uploading or deleting file", error });
+        // Save error information and continue processing the remaining files
+        return { error };
+      }
+    });
+
+    const uploadResults = await Promise.all(uploadPromises); // Wait for all uploads to finish
+    const failedUploads = uploadResults.filter(result => result.error);
+
+    if (failedUploads.length > 0) {
+      return res.status(500).send("Some files failed to upload");
+    }
+    res.status(200).send("Files uploaded successfully to S3");
+  } catch (err) {
+    console.error({ message: "Error uploading file to S3", error: err });
+    res.status(500).send("Error uploading file");
+  }
+});
+
+
+
 
 
 app.use("*", (req, res) => {
