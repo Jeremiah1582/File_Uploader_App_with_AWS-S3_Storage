@@ -151,7 +151,30 @@ app.get("/share:filename", (req, res)=>{
 });
 
 // DELETE file
-
+app.delete("/deleteFile:filename", async (req, res)=>{
+  log("delete file");
+  try {
+      // declare params
+      const params = {
+        Bucket: awsBucketName,
+        Key: req.params.filename,
+      };
+      // delete file
+      await s3.send(new DeleteObjectCommand(params)).then((response) => {
+        if (response.$metadata.httpStatusCode !== 204) {
+          console.error(response);
+          return res.status(500).send({ error: response });
+        }
+        console.log(`File deleted successfully..... ${response}`);
+        return res
+          .status(200)
+          .send({ message: "File deleted successfully....." });
+      });
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      return res.status(500).send({ error: error });
+    }
+})
 
 app.use("*", (req, res) => {
     res.status(404).send("404 this page doesn't exist");
