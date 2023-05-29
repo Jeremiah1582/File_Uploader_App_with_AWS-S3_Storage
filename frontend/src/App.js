@@ -1,12 +1,16 @@
 import React from 'react';
-import UploadModal from './components/UploadModal';
+import UploadModalComp from './components/UploadModalComp';
+import NavBar from './components/Nav';
+import ListFilesComp from './components/ListFilesComp';
+
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-    <UploadModal></UploadModal>
-    
+    <NavBar/>
+    <UploadModalComp/>
+    <ListFilesComp/>
     </div>
   );
 }

@@ -3,16 +3,13 @@ const express  =require("express");
 const cors =require("cors");
 const fs =require("fs")
 const path =require("path")
-const app = express();
+const app = express();// initiaize express app
 const PORT = process.env.PORT || 5001;
 const { v4: uuidv4 } =require("uuid")
 const multer =require("multer")
-
 require("dotenv").config();
-// import AWS V3 SDK methods
-
+// import AWS SDK 
 const {getSignedUrl} =require( "@aws-sdk/s3-request-presigner")
-
 const {
     S3Client,
     PutObjectCommand,
@@ -22,12 +19,12 @@ const {
     HeadObjectCommand
 } =require( "@aws-sdk/client-s3")
 
-// middleware 
+// Use middleware 
 app.use(express.static(path.join(__dirname, "Public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
-// multer middleware
+// Multer middleware for handling multipart/form-data, which is primarily used for file uploads
 const upload = multer({dest: "uploads/"});
 
 // AWS s3 bucket configuration
@@ -39,11 +36,10 @@ const s3 = new S3Client({
     }
 });
 
-// routes
+// routes 
 app.get("/", (req, res) => {  
     console.log("hello world");
 });
-
 // upload new object 
 app.post("/upload", upload.array("newFile", 10), async (req, res) => {
   const files = req.files;
@@ -51,7 +47,6 @@ app.post("/upload", upload.array("newFile", 10), async (req, res) => {
   if (!files) {
     return res.status(400).send("No file received");
   }
-
   try {
     const uploadPromises = files.map(async (file) => {
       const fileStream = createReadStream(file.path);
@@ -86,8 +81,6 @@ app.post("/upload", upload.array("newFile", 10), async (req, res) => {
     res.status(500).send("Error uploading file");
   }
 });
-
-
 // SHOW File list 
 app.get("/listFiles", async (req, res) => {
   console.log("list files");
@@ -130,7 +123,6 @@ app.get("/listFiles", async (req, res) => {
       console.error("An error occurred:", error);
   }
 });
-
 // SHARE file
 app.get("/share:filename", (req, res)=>{
   console.log("share file");
@@ -175,12 +167,12 @@ app.delete("/deleteFile:filename", async (req, res)=>{
       return res.status(500).send({ error: error });
     }
 })
-
+// 404 Route to handle all other requests
 app.use("*", (req, res) => {
     res.status(404).send("404 this page doesn't exist");
 });
 
-// server
+// Start server
 app.listen(PORT, ()=>{
     console.log(`server is running on port ${PORT}`);
 })
