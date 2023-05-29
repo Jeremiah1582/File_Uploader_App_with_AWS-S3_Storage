@@ -18,104 +18,99 @@ function UploadModalComp() {
 
   // Function to handle files input change
   const handleInput = (e) => {
-    setFiles([...files,...Array.from(e.target.files)]);
+    setFiles([...files, ...Array.from(e.target.files)]);
   };
- 
+
   // Function to handle file upload
   // Function to handle file upload
-const handleUpload = async (e) => {
-  e.preventDefault();
-  if (!files) {
-    console.log("Please select a file to upload");
-    return;
-  }
-  try {
-    console.log('trying to send file to backend....');
-    const formData = new FormData();
-    files.map((file)=>{
-      formData.append('newFile',file);
-    });
-
-    console.log('formData is...',formData);
-
-    // asynchronously upload files
-    const uploadPromises = files.map(file => {
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (!files) {
+      console.log("Please select a file to upload");
+      return;
+    }
+    try {
+      console.log("trying to send file to backend....");
       const formData = new FormData();
-      formData.append('newFile', file);
-      return axios.post(`${backendRootURL}/upload/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      files.map((file) => {
+        formData.append("newFile", file);
+      });
+
+      console.log("formData is...", formData);
+
+      // asynchronously upload files
+      const uploadPromises = files.map((file) => {
+        const formData = new FormData();
+        formData.append("newFile", file);
+        return axios.post(`${backendRootURL}/upload/`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      });
+
+      const responses = await Promise.all(uploadPromises);
+      responses.forEach((response) => {
+        if (response.status === 200) {
+          console.log("successfully uploaded file...", response);
+        } else {
+          console.log("upload unsuccessful", response.status);
         }
       });
-    });
-
-    const responses = await Promise.all(uploadPromises);
-    responses.forEach(response => {
-      if (response.status === 200) {
-        console.log('successfully uploaded file...', response);
-      } else {
-        console.log("upload unsuccessful", response.status);
-      }
-    });
-    handleClose();
-    refreshFunc();
-    setFiles([]);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
+      handleClose();
+      refreshFunc();
+      setFiles([]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   React.useEffect(() => {
-    console.log(' file are...... ',files);
+    console.log(" file are...... ", files);
   }, [files]);
   return (
     <>
-    <Button
-      style={{ marginTop: "100px" }}
-      variant="primary"
-      onClick={handleShow}
-    >
-      Upload New File
-    </Button>
+      <Button
+        style={{ marginTop: "100px" }}
+        variant="primary"
+        onClick={handleShow}
+      >
+        Upload New File
+      </Button>
 
-    <Modal show={show} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Select the files you want to upload</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Form 
-        onSubmit={handleUpload} encType="multipart/form-data"
-       
-        >
-          <Form.Group className="mb-3" controlId="formBasicEmail">
-            <Form.Label></Form.Label>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Select the files you want to upload</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleUpload} encType="multipart/form-data">
+            <Form.Group className="mb-3" controlId="formBasicEmail">
+              <Form.Label></Form.Label>
 
-            <Form.Control
-              type="file"
-              placeholder="click to add file"
-              name="newFile"
-              onChange={handleInput}
-              multiple
-              
-            />
-            <Form.Text className="text-muted">
-            Uploading files may take some time, please be patient
-            </Form.Text>
-          </Form.Group>
-          <Button type="submit" variant="primary">
-            Upload
+              <Form.Control
+                type="file"
+                placeholder="click to add file"
+                name="newFile"
+                onChange={handleInput}
+                multiple
+              />
+              <Form.Text className="text-muted">
+                Uploading files may take some time, please be patient
+              </Form.Text>
+            </Form.Group>
+            <Button type="submit" variant="primary">
+              Upload
+            </Button>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
           </Button>
-        </Form>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  </>
-  )
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
 }
 
-export default UploadModalComp
+export default UploadModalComp;
