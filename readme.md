@@ -62,15 +62,19 @@ The overall design of the application is based on a client-server model, where t
 # here are some improvement suggestions for the application
 **Architecture**
    - if you find that your state management needs are growing and becoming complex, you may want to consider using a more sophisticated state management library like Redux or Mobx.
-**-Security**
+
+**Security**
    - Use secure HTTP headers to protect application from common web vulnerabilities. could Consider using a library like helmet to help with this
    - Validate and sanitize user input to protect  application from malicious input (SQL Injection, XSS attacks, etc.). Libraries like express-validator can help with this.
    - Strengthen bucket user policies, attache IAM roles and assign IAM user to IAM roles to improve access efficiency
    - change bucket policy from PUBLIC to private and configure and EC2 to interact solely with the S3 Bucket, then allow only the application to interact with the EC2.
+
 **Code Quality**
    - Keep functions small and focused. Each function should ideally perform one task.
+
 **Error Handling:**
    - Make sure handling errors effectively is done in both your frontend and backend. On the server side, could consider creating a custom error handling middleware function that catches errors and sends back a consistent error response. On the client side, ensure code can handle server errors and provide useful feedback to the user.
+   
 **Performance**
    - can consider using a CDN for delivering your static files for improved loading times.
    - Monitoring the application's performance and looking for bottlenecks. Tools like New Relic or Datadog can be helpful.
