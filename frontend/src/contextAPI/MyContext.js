@@ -23,7 +23,7 @@ const [showAlert, setShowAlert] = useState(false)
   // Function to get the list of files from the backend
   const getFiles = async () => {
     try {
-      const response = await axios.get(`${backendRootURL}/list/uploads/`);
+      const response = await axios.get(`${backendRootURL}/listFiles/`);
       console.log('list uploads response is....', response);
       setFiles(response.data.files)
       setUrls(response.data.urls)
@@ -62,7 +62,7 @@ const [showAlert, setShowAlert] = useState(false)
   const deleteFile = async (e,file) => {
 e.preventDefault();
    try {
-    axios.delete(`${backendRootURL}/delete/${file}`).then((response) => {
+    axios.delete(`${backendRootURL}/deleteFile/${file}`).then((response) => {
       getFiles()
     })
     

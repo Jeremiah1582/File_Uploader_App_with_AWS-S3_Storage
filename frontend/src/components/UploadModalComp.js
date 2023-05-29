@@ -18,9 +18,7 @@ function UploadModalComp() {
 
   // Function to handle files input change
   const handleInput = (e) => {
-    
     setFiles([...files,...Array.from(e.target.files)]);
-  
   };
  
   // Function to handle file upload
