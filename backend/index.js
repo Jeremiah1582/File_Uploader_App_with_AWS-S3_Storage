@@ -131,7 +131,26 @@ app.get("/listFiles", async (req, res) => {
   }
 });
 
+// SHARE file
+app.get("/share:filename", (req, res)=>{
+  console.log("share file");
+  try {
+      const listObjectInBucket = new ListObjectsCommand({
+          Bucket: process.env.AWS_BUCKET_NAME,
+      });
+      const command = new GetObjectCommand({
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: req.params.filename, // file name
+      });
+      const url = getSignedUrl(s3, command, { expiresIn: 3600 }); // 1 hour
+      res.status(200).send({ url });
+  } catch (error) {
+      console.error("An error occurred:", error);
+      res.status(500).send({ error });
+  }
+});
 
+// DELETE file
 
 
 app.use("*", (req, res) => {
