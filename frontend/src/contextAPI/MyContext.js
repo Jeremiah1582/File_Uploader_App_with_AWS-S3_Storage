@@ -1,13 +1,12 @@
 import React, {useState, createContext, useEffect} from "react";
 import axios from "axios";
 
-
 // Create a new context named 'MyContext'
 export const MyContext = createContext();
 
 // This is the main MyProvider component, which provides the state and methods to its children
 export default function MyProvider({children}) {
-  const backendRootURL = process.env.PORT || 'http://localhost:5001';
+  const backendRootURL ='http://localhost:5001';
   // State variables for files and directory
   const [files, setFiles] = useState([])
   const [urls, setUrls] = useState([])
@@ -36,13 +35,13 @@ const [showAlert, setShowAlert] = useState(false)
   // File share link function
   const handleFileShare = async (fileName) => {
     // Implement handleFileShare functionality
-
     try {
       setShowAlert(true)
       console.log('handleFileShare filename is....', fileName)
+
       const response = await axios.get(`${backendRootURL}/share/${fileName}`)
       console.log('handleFileShare response is....', response);
-      navigator.clipboard.writeText(response.data.url)
+      navigator.clipboard.writeText(response.data.url) // copies url to clipboard
       setShareableLink(response.data.url) //url is the response from the backend
     }catch (error) {
       console.log('problem sharing file',error);
@@ -61,9 +60,13 @@ const [showAlert, setShowAlert] = useState(false)
   // Delete file function
   const deleteFile = async (e,file) => {
 e.preventDefault();
+console.log('delete file filename is....', file)
    try {
-    axios.delete(`${backendRootURL}/deleteFile/${file}`).then((response) => {
-      getFiles()
+    await axios
+    .get(`http://localhost:5001/deleteFile/${file}`)
+    .then((response) => {
+      console.log('delete file response is ...',response);
+    getFiles()
     })
     
   } catch (error) {

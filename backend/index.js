@@ -26,7 +26,7 @@ app.use(express.json());
 app.use(cors());
 // Multer middleware for handling multipart/form-data, which is primarily used for file uploads
 const upload = multer({dest: "uploads/"});
-
+const { createReadStream } = require("fs");
 // AWS s3 bucket configuration
 const s3 = new S3Client({
     region: process.env.AWS_BUCKET_REGION,
@@ -51,7 +51,7 @@ app.post("/upload", upload.array("newFile", 10), async (req, res) => {
     const uploadPromises = files.map(async (file) => {
       const fileStream = createReadStream(file.path);
       const params = {
-        Bucket: awsBucketName,
+        Bucket: process.env.AWS_BUCKET_NAME,
         Key: replaceSpaces(uuidv4()+"-"+file.originalname), // Using UUID for unique file names
         Body: fileStream, // using buffer would be quicker but image file isnt displayed correctly to client
           ContentType: file.mimetype,
@@ -124,7 +124,7 @@ app.get("/listFiles", async (req, res) => {
   }
 });
 // SHARE file
-app.get("/share:filename", (req, res)=>{
+app.get("/share/:filename", async (req, res)=>{
   console.log("share file");
   try {
       const listObjectInBucket = new ListObjectsCommand({
@@ -134,7 +134,7 @@ app.get("/share:filename", (req, res)=>{
           Bucket: process.env.AWS_BUCKET_NAME,
           Key: req.params.filename, // file name
       });
-      const url = getSignedUrl(s3, command, { expiresIn: 3600 }); // 1 hour
+      const url = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1 hour
       res.status(200).send({ url });
   } catch (error) {
       console.error("An error occurred:", error);
@@ -143,13 +143,13 @@ app.get("/share:filename", (req, res)=>{
 });
 
 // DELETE file
-app.delete("/deleteFile:filename", async (req, res)=>{
-  log("delete file");
+app.get("/deleteFile/:id", async (req, res)=>{
+  console.log("delete file", req.params.id );
   try {
       // declare params
       const params = {
-        Bucket: awsBucketName,
-        Key: req.params.filename,
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key:req.params.id
       };
       // delete file
       await s3.send(new DeleteObjectCommand(params)).then((response) => {

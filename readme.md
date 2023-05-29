@@ -74,7 +74,11 @@ The overall design of the application is based on a client-server model, where t
 
 **Error Handling:**
    - Make sure handling errors effectively is done in both your frontend and backend. On the server side, could consider creating a custom error handling middleware function that catches errors and sends back a consistent error response. On the client side, ensure code can handle server errors and provide useful feedback to the user.
-   
+
 **Performance**
    - can consider using a CDN for delivering your static files for improved loading times.
    - Monitoring the application's performance and looking for bottlenecks. Tools like New Relic or Datadog can be helpful.
+
+**Style** 
+- using a custom library rather that Bootstrap 
+- 
