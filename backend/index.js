@@ -88,6 +88,49 @@ app.post("/upload", upload.array("newFile", 10), async (req, res) => {
 });
 
 
+// SHOW File list 
+app.get("/listFiles", async (req, res) => {
+  console.log("list files");
+  try {
+      // declare variables
+      const filesMetaData=[]; // You had a typo here. It should be filesMetaData, not fileMetaData.
+      const files=[];
+      const urls=[];
+
+      const listObjectInBucket = new ListObjectsCommand({
+          Bucket: process.env.AWS_BUCKET_NAME,
+      });
+
+      await s3.send(listObjectInBucket).then(async (data) => {
+          for (let file of data.Contents) {
+              
+              const command = new GetObjectCommand({
+                  Bucket: process.env.AWS_BUCKET_NAME,
+                  Key: file.Key, // file name
+              });
+              // declare URL 
+              const url = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1 hour
+              // declare metadata
+              const metaData = await s3.send(new HeadObjectCommand({
+                  Bucket: process.env.AWS_BUCKET_NAME, 
+                  Key: file.Key
+              }));
+              
+              urls.push(url);
+              files.push(file.Key);   
+              filesMetaData.push(metaData); // It should be filesMetaData, not filesMeaData.
+          }
+          if (files.length === 0) {
+              return res.status(404).send("No files found");
+          }
+          res.status(200).send({ files, urls, filesMetaData });
+      });
+  } catch (error) {
+      // Always include error handling in your asynchronous functions.
+      console.error("An error occurred:", error);
+  }
+});
+
 
 
 
