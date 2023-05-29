@@ -27,6 +27,7 @@ app.use(cors());
 // Multer middleware for handling multipart/form-data, which is primarily used for file uploads
 const upload = multer({dest: "uploads/"});
 const { createReadStream } = require("fs");
+
 // AWS s3 bucket configuration
 const s3 = new S3Client({
     region: process.env.AWS_BUCKET_REGION,
@@ -36,12 +37,29 @@ const s3 = new S3Client({
     }
 });
 
+
+
 // routes 
 app.get("/", (req, res) => {  
     console.log("hello world");
 });
 // upload new object 
 app.post("/upload", upload.array("newFile", 10), async (req, res) => {
+  const replaceSpaces = (name) => {  
+    return name.replace(/ /g, "_");
+  };
+  const deleteFileAfterUpload = async (file) => {
+    try {
+      console.log("deleting file file", file)
+      await fs.unlink(file.path);
+      return uploadData;
+    } catch (error) {
+      console.error({ message: "Error deleting file", error });
+      // Save error information and continue processing the remaining files
+      return { error };
+    }
+  }
+  
   const files = req.files;
   
   if (!files) {
@@ -54,19 +72,12 @@ app.post("/upload", upload.array("newFile", 10), async (req, res) => {
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: replaceSpaces(uuidv4()+"-"+file.originalname), // Using UUID for unique file names
         Body: fileStream, // using buffer would be quicker but image file isnt displayed correctly to client
-          ContentType: file.mimetype,
-          ContentDisposition: 'inline',
+        ContentType: file.mimetype,
+        ContentDisposition: 'inline',
       };
-
-      try {
-        const uploadData = await s3.send(new PutObjectCommand(params));
-        fs.unlink(file.path);
-        return uploadData;
-      } catch (error) {
-        console.error({ message: "Error uploading or deleting file", error });
-        // Save error information and continue processing the remaining files
-        return { error };
-      }
+      const uploadData = await s3.send(new PutObjectCommand(params));
+      deleteFileAfterUpload(file);
+      return uploadData;
     });
 
     const uploadResults = await Promise.all(uploadPromises); // Wait for all uploads to finish
@@ -155,9 +166,9 @@ app.get("/deleteFile/:id", async (req, res)=>{
       await s3.send(new DeleteObjectCommand(params)).then((response) => {
         if (response.$metadata.httpStatusCode !== 204) {
           console.error(response);
-          return res.status(500).send({ error: response });
+          return res.status(500).send({ error: response});
         }
-        console.log(`File deleted successfully..... ${response}`);
+        console.log(`File deleted successfully..... ${response.data}`);
         return res
           .status(200)
           .send({ message: "File deleted successfully....." });

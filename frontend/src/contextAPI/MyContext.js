@@ -63,7 +63,7 @@ e.preventDefault();
 console.log('delete file filename is....', file)
    try {
     await axios
-    .get(`http://localhost:5001/deleteFile/${file}`)
+    .get(`${backendRootURL}/deleteFile/${file}`)
     .then((response) => {
       console.log('delete file response is ...',response);
     getFiles()
