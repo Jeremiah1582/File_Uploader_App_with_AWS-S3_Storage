@@ -45,22 +45,23 @@ app.get("/", (req, res) => {
 });
 // upload new object 
 app.post("/upload", upload.array("newFile", 10), async (req, res) => {
+  // Variables
+  const files = req.files;
+// Async functions
   const replaceSpaces = (name) => {  
     return name.replace(/ /g, "_");
   };
   const deleteFileAfterUpload = async (file) => {
     try {
-      console.log("deleting file file", file)
       await fs.unlink(file.path);
-      return uploadData;
     } catch (error) {
       console.error({ message: "Error deleting file", error });
       // Save error information and continue processing the remaining files
       return { error };
     }
   }
-  
-  const files = req.files;
+
+  console.log('this is files ....',files);
   
   if (!files) {
     return res.status(400).send("No file received");
@@ -75,9 +76,13 @@ app.post("/upload", upload.array("newFile", 10), async (req, res) => {
         ContentType: file.mimetype,
         ContentDisposition: 'inline',
       };
-      const uploadData = await s3.send(new PutObjectCommand(params));
+      try {
+         const uploadData = await s3.send(new PutObjectCommand(params));
       deleteFileAfterUpload(file);
       return uploadData;
+      } catch (error) {
+        console.log("PUTOBJEctCommand error uploading file", error);
+      }
     });
 
     const uploadResults = await Promise.all(uploadPromises); // Wait for all uploads to finish

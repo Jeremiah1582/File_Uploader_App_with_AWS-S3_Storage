@@ -89,7 +89,7 @@ const handleUpload = async (e) => {
        
         >
           <Form.Group className="mb-3" controlId="formBasicEmail">
-            <Form.Label>Upload files</Form.Label>
+            <Form.Label></Form.Label>
 
             <Form.Control
               type="file"
@@ -100,7 +100,7 @@ const handleUpload = async (e) => {
               
             />
             <Form.Text className="text-muted">
-              upload your data to the local file system
+            Uploading files may take some time, please be patient
             </Form.Text>
           </Form.Group>
           <Button type="submit" variant="primary">
