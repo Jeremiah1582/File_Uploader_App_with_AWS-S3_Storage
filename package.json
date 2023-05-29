@@ -1,0 +1,8 @@
+{
+  "name": "File_Uploader_App_with_AWS-S3_Storage",
+  "version": "1.0.0",
+  "description": "This is a file upload app that allows user to upload any file to t an AWS S3 bucket and retrieve it over the internet using a simple api",
+  "main": "index.js",
+  "author": "jeremiah.1582@googlemail.com",
+  "license": "MIT"
+}
